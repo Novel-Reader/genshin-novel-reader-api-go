@@ -3,18 +3,19 @@ package main
 import (
     "log"
     "os"
+    "time"
+    "github.com/fatih/color"
+    "github.com/gin-contrib/cors"
     "github.com/gin-gonic/gin"
+    "myproject/config"
     "myproject/middleware"
     "myproject/routes"
-    "myproject/config"
-    "log"
-    "os"
-    "github.com/fatih/color"
-    "time"
-    "github.com/gin-contrib/cors"
 )
 
 func main() {
+    // 设置Gin运行模式（生产环境建议使用ReleaseMode）
+    // gin.SetMode(gin.ReleaseMode)
+    
     // 打开日志文件
     // os.OpenFile() 函数有三个参数：
     // 1、path 文件路径
@@ -26,15 +27,9 @@ func main() {
         // 记录一个错误消息到标准错误输出（stderr）；终止程序的执行，返回一个非零的退出状态码。
         log.Fatal(err)
     }
+    
     // 设置日志输出的格式：日期, 时间, 文件名和行号（短格式）
     // 2025/01/01 08:00:00 example.go:12: Hello, World!
-    log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-    log.SetOutput(color.Output)
-
-    logFile, err := os.OpenFile("novel-reader-go-server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-    if err != nil {
-        log.Fatal(err)
-    }
     log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
     log.SetOutput(color.Output)
 
