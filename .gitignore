@@ -1,2 +1,3 @@
 *.log
 mysql-data
+.DS_Store
