@@ -13,18 +13,15 @@
 ### 本地运行
 
 ```bash
-# 克隆项目
-git clone https://github.com/Novel-Reader/Genshin-novel-reader-go-server.git
+# 在 genshin-novel-reader-scripts 项目中统一初始化仓库、配置和依赖
+bash ../genshin-novel-reader-scripts/scripts/init.sh
 
-cd Genshin-novel-reader-go-server
+# 启动共享数据库服务
+cd ../genshin-novel-reader-scripts
+docker compose up -d
 
-# 使用 Docker Compose 启动数据库服务
-docker-compose up -d
-
-# 安装依赖
-go mod tidy
-
-# 配置数据库（修改config/config.json）
+# 返回 Go API 仓库
+cd ../genshin-novel-reader-api-go
 
 # 启动服务
 go run main.go
@@ -53,7 +50,7 @@ go run main.go
 ```
 ├── config/                 # 配置文件
 │   ├── config.go          # 配置加载逻辑
-│   └── config.json        # 配置文件
+│   └── config.json        # 由 genshin-novel-reader-scripts 生成，不提交
 ├── db/                    # 数据库操作
 │   └── db.go             # 数据库连接和查询
 ├── middleware/            # 中间件
@@ -65,8 +62,6 @@ go run main.go
 │   └── routes.go        # 路由注册
 ├── templates/           # 模板文件
 │   └── welcome.html    # 欢迎页面
-├── upgrade/            # 数据库升级脚本
-├── docker-compose.yml  # Docker编排配置
 ├── go.mod              # Go模块依赖
 ├── go.sum              # 依赖校验
 └── main.go             # 应用入口
@@ -74,37 +69,11 @@ go run main.go
 
 ## 配置说明
 
-编辑 `config/config.json` 文件：
-
-```json
-{
-  "port": "8081",
-  "mysql": {
-    "host": "localhost",
-    "port": 3306,
-    "username": "root",
-    "password": "db_dev",
-    "database": "novel"
-  },
-  "redis": {
-    "host": "localhost",
-    "port": 6379,
-    "password": "password"
-  }
-}
-```
+数据库和 Redis 连接配置由工作区中的 `genshin-novel-reader-scripts/.env` 统一维护，并生成到 `config/config.json`。请勿手动提交该生成文件。
 
 ## 数据库初始化
 
-```bash
-# 执行初始化脚本
-mysql -u root -p < upgrade/sql/init.sql
-
-# 执行版本升级脚本
-mysql -u root -p novel < upgrade/sql/1.0/mysql.sql
-mysql -u root -p novel < upgrade/sql/1.5/mysql.sql
-mysql -u root -p novel < upgrade/sql/1.7/mysql.sql
-```
+数据库容器和版本化 SQL 迁移由 `genshin-novel-reader-scripts` 项目统一维护。请按该项目 README 中的说明启动数据库并执行迁移。
 
 ## 开发指南
 
@@ -130,13 +99,13 @@ results, err := db.QueryDB("SELECT * FROM user WHERE email = ?", email)
 # 查看实时日志
 tail -f novel-reader-go-server.log
 
-# 查看Docker容器日志
-docker-compose logs -f
+# 查看共享数据库日志
+docker compose -f ../genshin-novel-reader-scripts/docker-compose.yml logs -f db
 ```
 
 ### 常见问题
 
-1. 端口占用: 修改 `config.json` 中的端口配置
+1. 端口占用: 在 `genshin-novel-reader-scripts/.env` 中修改对应端口后重新生成配置
 2. 数据库连接失败: 检查MySQL服务状态和连接配置
 3. 依赖缺失: 运行 `go mod tidy` 重新下载依赖
 
